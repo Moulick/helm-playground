@@ -1,21 +1,34 @@
 name: Compile Wasm
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "deploy"
+  cancel-in-progress: true
 
 jobs:
   wasm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.15"
-      - uses: actions/setup-node@v2
+          go-version-file: 'go.mod'
+          check-latest: true
+          cache: true
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "24"
       - run: go version
       - run: make test
       - run: yarn --cwd ./browser-test && make browser-test
@@ -26,7 +39,7 @@ jobs:
           rm .gitignore
           if git diff --stat | grep dist/ --quiet; then
             echo "There were changes. Committing.";
-            git add dist/*;
+            git add --force dist/;
             git commit -m "[GitHub action] Wasm module";
             git push
           else
