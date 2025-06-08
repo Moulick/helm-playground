@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Helm Playground | Debug Helm templates in your browser</title>
-    <meta
-      name="description"
-      content="Live preview Helm charts in your browser."
-    />
-    <link rel="stylesheet" href="codemirror/codemirror.css" />
-    <link rel="stylesheet" href="codemirror/material.css" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-  </head>
-  <body>
-    <div class="app app--playground">
-      <div class="top">
-        <a class="logo" href="/">Helm-playground.com</a>
-        <a class="top__link" href="/cheatsheet.html"
-          >Syntax cheatsheet
-          <span
-            style="
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Helm Playground | Debug Helm templates in your browser</title>
+  <meta name="description" content="Live preview Helm charts in your browser." />
+  <link rel="stylesheet" href="codemirror/codemirror.css" />
+  <link rel="stylesheet" href="codemirror/material.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+
+<body>
+  <div class="app app--playground">
+    <div class="top">
+      <a class="logo" href="/">Helm-playground.com</a>
+      <a class="top__link" href="/cheatsheet.html">Syntax cheatsheet
+        <span style="
               background-color: #059669;
               text-transform: uppercase;
               font-weight: 600;
@@ -28,44 +25,27 @@
               border-radius: 4px;
               font-size: 10px;
               color: #ecfdf5;
-            "
-            >New</span
-          ></a
-        >
-        <a
-          style="margin-left: auto"
-          class="top__link hide-on-mobile"
-          href="https://shipmight.com"
-          >Brought to you by Shipmight - Kubernetes-powered PaaS in your
-          cloud</a
-        >
+            ">New</span></a>
+      <a style="margin-left: auto" class="top__link hide-on-mobile" href="https://shipmight.com">Brought to you by
+        Shipmight - Kubernetes-powered PaaS in your
+        cloud</a>
+    </div>
+    <div class="content">
+      <div class="column">
+        <div class="label">template.yaml</div>
+        <textarea class="textarea textarea--template"></textarea>
       </div>
-      <div class="content">
-        <div class="column">
-          <div class="label">template.yaml</div>
-          <textarea class="textarea textarea--template"></textarea>
-        </div>
-        <div class="column">
-          <div class="label">values.yaml</div>
-          <textarea class="textarea textarea--values"></textarea>
-        </div>
-        <div class="column">
-          <div class="label">output</div>
-          <textarea class="textarea textarea--output" readonly></textarea>
-        </div>
-        <div class="overlay">
-          <p><button class="start">Start playground</button></p>
-          <p><strong>Debug Helm templates in your browser</strong></p>
-          <p class="overlay__dim">
-            A WebAssembly-file (2.3MB gzipped) will be downloaded and cached by
-            your browser. It includes Sprig, which Helm uses for templating.
-            Source on
-            <a href="https://github.com/shipmight/helm-playground">GitHub</a>.
-          </p>
-        </div>
-        <div class="floating-error" style="display: none"></div>
-        <div class="floating-warning" style="display: none"></div>
+      <div class="column">
+        <div class="label">values.yaml</div>
+        <textarea class="textarea textarea--values"></textarea>
       </div>
+      <div class="column">
+        <div class="label">output</div>
+        <textarea class="textarea textarea--output" readonly></textarea>
+      </div>
+      <div class="floating-error" style="display: none"></div>
+      <div class="floating-warning" style="display: none"></div>
+    </div>
     </div>
     <script src="codemirror/codemirror.js"></script>
     <script src="codemirror/yaml.js"></script>
@@ -184,65 +164,60 @@
         }
       };
 
-      startButton.addEventListener("click", () => {
-        startButton.disabled = true;
-        startButton.textContent = "Loading…";
-
+          // Auto-start the playground on page load
         window
           .loadGetYaml()
           .then((getYaml) => {
-            overlay.style.display = "none";
-
             const markers = new Set();
 
             const onChange = () => {
               const templateValue = templateCodeMirror.getValue();
               const valuesValue = valuesCodeMirror.getValue();
 
-              const { yaml, err, warning } = getYaml(
-                templateValue,
-                valuesValue
-              );
+            const { yaml, err, warning } = getYaml(
+              templateValue,
+              valuesValue
+            );
 
-              for (const marker of markers.values()) {
-                marker.clear();
-                markers.delete(marker);
+            for (const marker of markers.values()) {
+              marker.clear();
+              markers.delete(marker);
+            }
+
+            errorNotification.style.display = "none";
+            warningNotification.style.display = "none";
+
+            if (err) {
+              const templateError = parseTemplateError(err);
+              if (templateError) {
+                const { lineNum, characterNum } = templateError;
+                const start =
+                  typeof characterNum === "undefined" ? 0 : characterNum;
+                const end =
+                  typeof characterNum === "undefined"
+                    ? 1000
+                    : characterNum + 1;
+                const marker = templateCodeMirror.markText(
+                  { line: lineNum, ch: start },
+                  { line: lineNum, ch: end },
+                  { className: "marker-error" }
+                );
+                markers.add(marker);
               }
 
-              errorNotification.style.display = "none";
-              warningNotification.style.display = "none";
+            errorNotification.style.display = "block";
+            errorNotification.textContent = formatError(err);
+          } else {
+            outputCodeMirror.setValue(yaml);
 
-              if (err) {
-                const templateError = parseTemplateError(err);
-                if (templateError) {
-                  const { lineNum, characterNum } = templateError;
-                  const start =
-                    typeof characterNum === "undefined" ? 0 : characterNum;
-                  const end =
-                    typeof characterNum === "undefined"
-                      ? 1000
-                      : characterNum + 1;
-                  const marker = templateCodeMirror.markText(
-                    { line: lineNum, ch: start },
-                    { line: lineNum, ch: end },
-                    { className: "marker-error" }
-                  );
-                  markers.add(marker);
-                }
+            if (warning) {
+              warningNotification.style.display = "block";
+              warningNotification.textContent = `Warning, the generated YAML may contain parsing errors. Converting it to JSON failed: ${warning}`;
+            }
+          }
 
-                errorNotification.style.display = "block";
-                errorNotification.textContent = formatError(err);
-              } else {
-                outputCodeMirror.setValue(yaml);
-
-                if (warning) {
-                  warningNotification.style.display = "block";
-                  warningNotification.textContent = `Warning, the generated YAML may contain parsing errors. Converting it to JSON failed: ${warning}`;
-                }
-              }
-
-              updateHash(templateValue, valuesValue);
-            };
+            updateHash(templateValue, valuesValue);
+          };
 
             templateCodeMirror.on("change", onChange);
             valuesCodeMirror.on("change", onChange);
@@ -250,13 +225,9 @@
           })
           .catch((error) => {
             console.error(error);
-          });
       });
-    </script>
-    <script
-      src="https://cdn.usefathom.com/script.js"
-      data-site="ZNCHLJMX"
-      defer
-    ></script>
-  </body>
+</script>
+  <script src="https://cdn.usefathom.com/script.js" data-site="ZNCHLJMX" defer></script>
+</body>
+
 </html>
