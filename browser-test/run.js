@@ -51,8 +51,6 @@ async function run() {
     page.$eval(".textarea--output", (el) => el.CodeMirror.getValue());
 
   console.error("[browser-test] running test");
-  await page.click(".start");
-  await page.waitForSelector(".start", { hidden: true, timeout: 5000 });
   assert.equal(await getOutput(), initialOutput, "should see initial output");
   assert.equal(
     await getPageUrl(),

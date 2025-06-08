@@ -9,7 +9,7 @@ module github.com/shipmight/helm-playground
 // Update these commands with the versions and then run them!
 // Also keep go version in sync!
 
-go 1.23.0
+go 1.24
 
 toolchain go1.24.4
 
@@ -29,6 +29,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 )
