@@ -1,11 +1,11 @@
 module github.com/shipmight/helm-playground
 
 // Based on:
-//   https://github.com/helm/helm/blob/v3.14.0/go.mod
+//   https://github.com/helm/helm/blob/v3.18.2/go.mod
 // Commands:
-//   go get github.com/BurntSushi/toml@v1.3.2
-//   go get github.com/Masterminds/sprig/v3@v3.2.3
-//   go get sigs.k8s.io/yaml@v1.3.0
+//   go get github.com/BurntSushi/toml@v1.5.0
+//   go get github.com/Masterminds/sprig/v3@v3.3.0
+//   go get sigs.k8s.io/yaml@v1.4.0
 // Update these commands with the versions and then run them!
 // Also keep go version in sync!
 
