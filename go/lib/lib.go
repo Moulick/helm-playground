@@ -12,39 +12,16 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type ReleaseObj struct {
-	Name      string
-	Namespace string
-	IsUpgrade bool
-	IsInstall bool
-	Revision  int
-	Service   string
-}
+type ReleaseMap map[string]interface{}
 
-type ChartObj struct {
-	ApiVersion   string
-	Name         string
-	Version      string
-	KubeVersion  string
-	Description  string
-	Type         string
-	Keywords     []string
-	Home         string
-	Sources      []string
-	Dependencies []interface{}
-	Maintainers  []interface{}
-	Icon         string
-	AppVersion   string
-	Deprecated   bool
-	Annotations  map[string]interface{}
-}
+type ChartMap map[string]interface{}
 
-type ValuesObj map[string]interface{}
+type ValuesMap map[string]interface{}
 
 type TemplateData struct {
-	Release ReleaseObj
-	Chart   ChartObj
-	Values  ValuesObj
+	Release ReleaseMap
+	Chart   ChartMap
+	Values  ValuesMap
 }
 
 type GetYamlReturnValue struct {
@@ -58,46 +35,46 @@ type GetYamlConfig struct {
 }
 
 func toJson(returnValue GetYamlReturnValue) string {
-	bytes, err := json.Marshal(returnValue)
+	b, err := json.Marshal(returnValue)
 	if err != nil {
 		return `{"err":"conversion to JSON failed"}`
 	}
-	return string(bytes)
+	return string(b)
 }
 
 func GetYaml(templateYaml string, valuesYaml string, config GetYamlConfig) string {
-	valuesData := ValuesObj{}
+	valuesData := ValuesMap{}
 	if err := yaml.Unmarshal([]byte(valuesYaml), &valuesData); err != nil {
 		return toJson(GetYamlReturnValue{
 			Err: err.Error(),
 		})
 	}
 
-	releaseData := ReleaseObj{
-		Name:      "example",
-		Namespace: "example",
-		IsUpgrade: false,
-		IsInstall: false,
-		Revision:  1,
-		Service:   "Helm",
+	releaseData := ReleaseMap{
+		"Name":      "example",
+		"Namespace": "example",
+		"IsUpgrade": false,
+		"IsInstall": false,
+		"Revision":  1,
+		"Service":   "Helm",
 	}
 
-	chartData := ChartObj{
-		ApiVersion:   "v2",
-		Name:         "example",
-		Version:      "0.1.0",
-		KubeVersion:  "",
-		Description:  "example",
-		Type:         "application",
-		Keywords:     make([]string, 0),
-		Home:         "",
-		Sources:      make([]string, 0),
-		Dependencies: make([]interface{}, 0),
-		Maintainers:  make([]interface{}, 0),
-		Icon:         "",
-		AppVersion:   "",
-		Deprecated:   false,
-		Annotations:  make(map[string]interface{}),
+	chartData := ChartMap{
+		"ApiVersion":   "v2",
+		"Name":         "example",
+		"Version":      "0.1.0",
+		"KubeVersion":  "",
+		"Description":  "example",
+		"Type":         "application",
+		"Keywords":     make([]string, 0),
+		"Home":         "",
+		"Sources":      make([]string, 0),
+		"Dependencies": make([]interface{}, 0),
+		"Maintainers":  make([]interface{}, 0),
+		"Icon":         "",
+		"AppVersion":   "",
+		"Deprecated":   false,
+		"Annotations":  make(map[string]interface{}),
 	}
 
 	templateData := TemplateData{
@@ -197,7 +174,7 @@ func GetYaml(templateYaml string, valuesYaml string, config GetYamlConfig) strin
 
 	outputYaml := output.String()
 
-	lintValues := ValuesObj{}
+	lintValues := ValuesMap{}
 	if err := yaml.Unmarshal([]byte(outputYaml), &lintValues); err != nil {
 		fmt.Printf("%e", err)
 		return toJson(GetYamlReturnValue{
