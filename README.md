@@ -7,6 +7,8 @@ Main changes:
 - Updated dependencies to the latest versions.
 - Auto publish website when updated.
 - Remove the start button on website load and instead directly load the wasm module.
+- Remove commiting the wasm module to the repository, instead it is built in a GitHub action and published to GitHub Pages.
+- Make the `.Chart` and `.Release` as `map[string]interface{}` to https://github.com/Moulick/helm-playground/issues/2
 
 This repository contains the source code for https://helm-playground.moulick.xyz
 
